@@ -1,0 +1,75 @@
+name: CI — AI Test Generator
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  api-tests:
+    name: API Tests (Open Library REST API)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run API tests
+        run: pytest tests/api/ -v --tb=short -m api
+
+  e2e-tests:
+    name: E2E Tests (Open Library UI — Playwright)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
+      - name: Run E2E tests (headless)
+        run: pytest tests/e2e/ -v --tb=short -m e2e --browser chromium
+
+  generate-tests:
+    name: AI Test Generation (dry run — verify Gemini integration)
+    runs-on: ubuntu-latest
+    # Only runs when GEMINI_API_KEY secret is configured
+    if: ${{ vars.GEMINI_API_KEY_AVAILABLE == 'true' }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Generate tests via Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: python scripts/generate_tests.py
+
+      - name: Run generated API tests
+        run: pytest tests/api/ -v --tb=short
+
+      - name: Install Playwright browsers
+        run: playwright install --with-deps chromium
+
+      - name: Run generated E2E tests
+        run: pytest tests/e2e/ -v --tb=short --browser chromium

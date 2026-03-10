@@ -12,6 +12,7 @@ Usage:
 
 import argparse
 import sys
+import time
 from pathlib import Path
 
 # Allow imports from src/ regardless of working directory
@@ -43,6 +44,10 @@ def main() -> None:
     if run_api:
         print("⚙️  Generating API tests via Gemini...")
         write_file(API_OUTPUT, generate_api_tests())
+
+    if run_api and run_e2e:
+        print("⏳ Waiting 35s to avoid free-tier token-per-minute rate limit...")
+        time.sleep(35)
 
     if run_e2e:
         print("⚙️  Generating E2E tests via Gemini...")

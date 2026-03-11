@@ -31,4 +31,5 @@ def get_llm() -> ChatGoogleGenerativeAI:
         model="gemini-2.0-flash",
         google_api_key=api_key,
         temperature=0,
+        max_retries=0,
     )

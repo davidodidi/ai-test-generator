@@ -60,7 +60,9 @@ LOGO SELECTOR RULE:
 
 - Include these exact test cases:
     1. Homepage loads: navigate to BASE_URL, verify the page title contains "Open Library"
-       and the search input (input[name='q']) is visible.
+       using: expect(page).to_have_title(re.compile("Open Library"))
+       Also verify the search input (input[name='q']) is visible.
+       Import re at the top of the file.
     2. Search flow: type "Dune" into input[name='q'], press Enter, wait for URL to contain
        "/search" using page.wait_for_url("**/search**", timeout=30000), then assert at least
        one li.searchResultItem is visible.

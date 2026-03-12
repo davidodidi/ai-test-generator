@@ -27,7 +27,9 @@ Requirements:
   module-level constant: BASE_URL = "https://openlibrary.org"
 - Use pytest parametrize where appropriate.
 - Include these exact test coverage areas:
-    1. Happy path: search for books by title (GET /search.json?title=<query>)
+    1. Happy path: search for books by title (GET /search.json?title=<query>).
+       Open Library returns up to 100 docs per page by default. Assert status_code == 200
+       and len(data["docs"]) > 0. Do NOT assert len(data["docs"]) == 1.
     2. Happy path: fetch a specific work by known OLID (GET /works/OL45804W.json — "Fantastic Mr Fox")
     3. Validation: search with an empty title query string (GET /search.json?title=) returns HTTP 500.
        This is a known Open Library API bug. Assert status_code == 500 exactly.

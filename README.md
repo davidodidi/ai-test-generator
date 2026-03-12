@@ -1,6 +1,6 @@
 # ai-test-generator
 
-An AI-powered test generation framework that uses **Google Gemini (free tier)** via **LangChain** to generate pytest + Playwright test suites targeting **Open Library** — a production website and public REST API.
+An AI-powered test generation framework that uses **Groq (LLaMA 3.3-70b)** via **LangChain** to autonomously generate pytest + Playwright test suites targeting **Open Library** — a production website and public REST API.
 
 > **David Odidi — QA Automation Engineer | Java • Selenium • Playwright • Cypress • RestAssured • Python • CI/CD (GitHub Actions and Jenkins) | github.com/davidodidi**
 
@@ -17,14 +17,14 @@ An AI-powered test generation framework that uses **Google Gemini (free tier)** 
 ```
 ai-test-generator/
 ├── src/ai_generator/
-│   ├── gemini_client.py        # LangChain ChatGoogleGenerativeAI wrapper
-│   ├── api_test_generator.py   # Prompt → Gemini → API test code
-│   └── e2e_test_generator.py   # Prompt → Gemini → Playwright test code
+│   ├── gemini_client.py        # LangChain ChatGroq wrapper (LLaMA 3.3-70b)
+│   ├── api_test_generator.py   # Prompt → Groq → API test code
+│   └── e2e_test_generator.py   # Prompt → Groq → Playwright test code
 ├── tests/
 │   ├── api/test_openlibrary_api.py   # API integration tests (requests)
 │   └── e2e/test_openlibrary_ui.py    # E2E UI tests (Playwright)
 ├── scripts/
-│   └── generate_tests.py       # CLI: regenerate tests via Gemini
+│   └── generate_tests.py       # CLI: regenerate tests via Groq
 ├── conftest.py
 ├── pytest.ini
 └── .github/workflows/ci.yml
@@ -33,17 +33,18 @@ ai-test-generator/
 ### How AI generation works
 
 1. `scripts/generate_tests.py` is called (manually or in CI)
-2. LangChain constructs a prompt describing the desired test coverage
-3. Gemini (`gemini-1.5-flash`, free tier) returns raw Python test code
-4. The output is written to `tests/api/` or `tests/e2e/`
-5. pytest runs the generated files as normal
+2. LangChain constructs a detailed prompt describing the desired test coverage, selectors, and Playwright rules
+3. Groq (`llama-3.3-70b-versatile`, free tier) returns raw Python test code
+4. Code fences are stripped programmatically in case the LLM includes them
+5. The output is written to `tests/api/` or `tests/e2e/`
+6. pytest runs the generated files immediately to validate them
 
 ---
 
 ## Prerequisites
 
 - Python 3.11+
-- A **free** Gemini API key from [Google AI Studio](https://makersuite.google.com/app/apikey)
+- A **free** Groq API key from [console.groq.com](https://console.groq.com/keys)
 
 ---
 
@@ -60,14 +61,14 @@ pip install -r requirements.txt
 playwright install chromium
 
 cp .env.example .env
-# Edit .env and set GEMINI_API_KEY=<your key>
+# Edit .env and set GROQ_API_KEY=<your key>
 ```
 
 ---
 
 ## Usage
 
-### Run the baseline tests (no Gemini key needed)
+### Run the baseline tests (no Groq key needed)
 
 ```bash
 # API tests only
@@ -80,7 +81,7 @@ pytest tests/e2e/ -m e2e -v --browser chromium
 pytest
 ```
 
-### Regenerate tests via Gemini
+### Regenerate tests via Groq
 
 ```bash
 # Regenerate both API and E2E tests
@@ -105,13 +106,13 @@ Three jobs run on every push to `main`:
 |---|---|---|
 | `api-tests` | Always | Runs `tests/api/` against live Open Library API |
 | `e2e-tests` | Always | Runs `tests/e2e/` headless via Playwright/Chromium |
-| `generate-tests` | When `GEMINI_API_KEY` secret is set | Calls Gemini, writes generated tests, runs them |
+| `generate-tests` | When `GROQ_API_KEY` secret is set | Calls Groq, writes generated tests, runs them |
 
 To enable AI generation in CI:
 
-1. Go to **Settings → Secrets → Actions** in your GitHub repo
-2. Add secret: `GEMINI_API_KEY` = your Gemini API key
-3. Add variable: `GEMINI_API_KEY_AVAILABLE` = `true`
+1. Go to **Settings → Secrets and variables → Actions** in your GitHub repo
+2. Add secret: `GROQ_API_KEY` = your Groq API key
+3. Add variable: `GROQ_API_KEY_AVAILABLE` = `true`
 
 ---
 
@@ -121,7 +122,7 @@ To enable AI generation in CI:
 |---|---|---|
 | Happy path | `GET /search.json?title=Dune` | HTTP 200, numFound > 0 |
 | Happy path | `GET /works/OL45804W.json` | HTTP 200, correct title |
-| Validation | `GET /search.json?title=` | Graceful 200 response |
+| Validation | `GET /search.json?title=` | HTTP 500 (known Open Library API bug) |
 | Validation | `GET /works/OL00000000INVALID.json` | HTTP 404 |
 | Schema | `/search.json` response | `numFound`, `docs` keys present |
 | Schema | Work detail response | `title`, `key` keys present |
@@ -146,8 +147,8 @@ To enable AI generation in CI:
 | Layer | Technology |
 |---|---|
 | Language | Python 3.11 |
-| AI / LLM | Google Gemini (`gemini-1.5-flash`) — free tier |
-| LLM framework | LangChain (`langchain`, `langchain-google-genai`) |
+| AI / LLM | Groq (`llama-3.3-70b-versatile`) — free tier |
+| LLM framework | LangChain (`langchain`, `langchain-groq`) |
 | API testing | pytest + requests |
 | E2E testing | pytest + Playwright (Python) |
-| CI | GitHub Actions |
+| CI | GitHub Actions (Ubuntu 24.04) |

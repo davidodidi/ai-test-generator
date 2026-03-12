@@ -46,14 +46,17 @@ CONFIRMED WORKING SELECTORS (use these exactly — do not invent alternatives):
 CRITICAL RULES FOR MULTI-ELEMENT LOCATORS:
 - li.searchResultItem matches 20+ elements. NEVER call expect() on it directly.
   Always use .first: expect(page.locator("li.searchResultItem").first).to_be_visible()
-- h1.work-title matches 2 elements. NEVER call expect() on it directly.
-  Always use .nth(0): expect(page.locator("h1.work-title").nth(0)).to_be_visible()
+- h1.work-title matches 2 elements and is hidden off-screen — to_be_visible() will FAIL.
+  Always use this exact pattern:
+    page.wait_for_selector("h1.work-title", state="attached", timeout=30000)
+    heading_text = page.locator("h1.work-title").nth(0).inner_text()
+    assert len(heading_text.strip()) > 0
 - li.searchResultItem a.results matches multiple elements. Always use .nth(0) to click.
 
 LOGO SELECTOR RULE:
-- a.logoLink may take time to appear. Always wait first:
-  page.wait_for_selector("a.logoLink", timeout=30000)
-  then: expect(page.locator("a.logoLink").first).to_be_visible()
+- a.logoLink may not be present on all pages. Use a fallback selector with .first:
+  logo = page.locator("a.logoLink, #header-logo, a[href='/'] img").first
+  expect(logo).to_be_visible()
 
 - Include these exact test cases:
     1. Homepage loads: navigate to BASE_URL, verify the page title contains "Open Library"

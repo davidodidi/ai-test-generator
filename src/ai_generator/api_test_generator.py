@@ -46,6 +46,16 @@ Generate the complete test file now.
 )
 
 
+def _strip_code_fences(code: str) -> str:
+    """Remove markdown code fences if the LLM wraps output despite instructions."""
+    lines = code.strip().splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].startswith("```"):
+        lines = lines[:-1]
+    return "\n".join(lines)
+
+
 def generate_api_tests() -> str:
     """
     Invoke Groq via LangChain to generate API test source code.
@@ -54,4 +64,4 @@ def generate_api_tests() -> str:
         str: Raw Python source code for the generated test file.
     """
     chain = API_TEST_PROMPT | get_llm() | StrOutputParser()
-    return chain.invoke({})
+    return _strip_code_fences(chain.invoke({}))

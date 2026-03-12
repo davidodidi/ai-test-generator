@@ -80,6 +80,16 @@ Generate the complete test file now.
 )
 
 
+def _strip_code_fences(code: str) -> str:
+    """Remove markdown code fences if the LLM wraps output despite instructions."""
+    lines = code.strip().splitlines()
+    if lines and lines[0].startswith("```"):
+        lines = lines[1:]
+    if lines and lines[-1].startswith("```"):
+        lines = lines[:-1]
+    return "\n".join(lines)
+
+
 def generate_e2e_tests() -> str:
     """
     Invoke Groq via LangChain to generate Playwright E2E test source code.
@@ -88,4 +98,4 @@ def generate_e2e_tests() -> str:
         str: Raw Python source code for the generated test file.
     """
     chain = E2E_TEST_PROMPT | get_llm() | StrOutputParser()
-    return chain.invoke({})
+    return _strip_code_fences(chain.invoke({}))

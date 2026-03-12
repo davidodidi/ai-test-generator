@@ -43,6 +43,18 @@ CONFIRMED WORKING SELECTORS (use these exactly — do not invent alternatives):
 - Book detail heading: h1.work-title
 - Search results URL pattern: /search
 
+CRITICAL RULES FOR MULTI-ELEMENT LOCATORS:
+- li.searchResultItem matches 20+ elements. NEVER call expect() on it directly.
+  Always use .first: expect(page.locator("li.searchResultItem").first).to_be_visible()
+- h1.work-title matches 2 elements. NEVER call expect() on it directly.
+  Always use .nth(0): expect(page.locator("h1.work-title").nth(0)).to_be_visible()
+- li.searchResultItem a.results matches multiple elements. Always use .nth(0) to click.
+
+LOGO SELECTOR RULE:
+- a.logoLink may take time to appear. Always wait first:
+  page.wait_for_selector("a.logoLink", timeout=30000)
+  then: expect(page.locator("a.logoLink").first).to_be_visible()
+
 - Include these exact test cases:
     1. Homepage loads: navigate to BASE_URL, verify the page title contains "Open Library"
        and the search input (input[name='q']) is visible.

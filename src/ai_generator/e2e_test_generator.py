@@ -28,6 +28,10 @@ Requirements:
   and will cause a ScopeMismatch error. Use a module-level constant instead:
   BASE_URL = "https://openlibrary.org"
 - Use `expect` from `playwright.sync_api` for assertions.
+- ALWAYS use page.locator() to find elements — NEVER use page.query_selector() or
+  page.query_selector_all(). These return ElementHandle objects which are incompatible
+  with expect() and do not have .nth(). page.locator() returns a Locator which works
+  correctly with expect() and .nth().
 - Use explicit waits: page.wait_for_selector(), expect(locator).to_be_visible(), etc.
   Do NOT use time.sleep() anywhere.
 
@@ -43,7 +47,8 @@ CONFIRMED WORKING SELECTORS (use these exactly — do not invent alternatives):
     1. Homepage loads: navigate to BASE_URL, verify the page title contains "Open Library"
        and the search input (input[name='q']) is visible.
     2. Search flow: type "Dune" into input[name='q'], press Enter, wait for URL to contain
-       "/search", then assert at least one li.searchResultItem is visible.
+       "/search" using page.wait_for_url("**/search**", timeout=30000), then assert at least
+       one li.searchResultItem is visible.
     3. Book detail: navigate to https://openlibrary.org/search?q=Dune, wait for
        li.searchResultItem a.results, click the first one (.nth(0)), wait for URL to
        contain "/works/", then assert h1.work-title is visible.

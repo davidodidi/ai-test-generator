@@ -17,7 +17,7 @@ An AI-powered test generation framework that uses **Groq (LLaMA 3.3-70b)** via *
 ```
 ai-test-generator/
 ├── src/ai_generator/
-│   ├── gemini_client.py        # LangChain ChatGroq wrapper (LLaMA 3.3-70b)
+│   ├── groq_client.py          # LangChain ChatGroq wrapper (LLaMA 3.3-70b)
 │   ├── api_test_generator.py   # Prompt → Groq → API test code
 │   └── e2e_test_generator.py   # Prompt → Groq → Playwright test code
 ├── tests/

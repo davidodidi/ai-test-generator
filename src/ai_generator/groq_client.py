@@ -5,7 +5,7 @@ LangChain wrapper around Groq (free tier).
 Provides a single reusable LLM instance for all generators.
 
 Groq runs LLaMA 3 with extremely fast inference and a generous free tier
-(14,400 requests/day, 30 requests/minute) -- well within CI usage.
+(14,400 requests/day, 30 requests/minute) — well within CI usage.
 """
 
 import os

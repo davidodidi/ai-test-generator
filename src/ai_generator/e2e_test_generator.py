@@ -13,7 +13,7 @@ Coverage areas generated:
 
 from langchain_core.prompts import PromptTemplate
 from langchain_core.output_parsers import StrOutputParser
-from .gemini_client import get_llm
+from .groq_client import get_llm
 
 E2E_TEST_PROMPT = PromptTemplate.from_template(
     """

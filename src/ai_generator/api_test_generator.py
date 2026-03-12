@@ -1,7 +1,7 @@
 """
 src/ai_generator/api_test_generator.py
 
-Uses LangChain + Gemini to generate pytest API test code targeting
+Uses LangChain + Groq to generate pytest API test code targeting
 the Open Library REST API (https://openlibrary.org/dev/docs/api).
 
 Coverage areas generated:
@@ -22,7 +22,10 @@ for the Open Library REST API (base URL: https://openlibrary.org).
 
 Requirements:
 - Use the `requests` library for HTTP calls. Do NOT use httpx.
-- Use pytest fixtures and parametrize where appropriate.
+- Do NOT define any pytest fixture named `base_url` — this name is reserved by
+  pytest-playwright and will cause a ScopeMismatch error. Instead define a
+  module-level constant: BASE_URL = "https://openlibrary.org"
+- Use pytest parametrize where appropriate.
 - Include these exact test coverage areas:
     1. Happy path: search for books by title (GET /search.json?title=<query>)
     2. Happy path: fetch a specific work by known OLID (GET /works/OL45804W.json — "Fantastic Mr Fox")
@@ -42,7 +45,7 @@ Generate the complete test file now.
 
 def generate_api_tests() -> str:
     """
-    Invoke Gemini via LangChain to generate API test source code.
+    Invoke Groq via LangChain to generate API test source code.
 
     Returns:
         str: Raw Python source code for the generated test file.
